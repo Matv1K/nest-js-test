@@ -29,14 +29,10 @@ Follow these steps to set up and run the NestJS + PostgreSQL project:
   ```
 
 ## 4. Run the Application
-- For development (with hot reload):
+- For local development:
   ```sh
   npm run start:dev
   ```
 
 ## 5. API Documentation
 - See `API_DOC.md` in the project root for available endpoints, request bodies, and usage details.
-
----
-
-If you encounter any issues, ensure your database credentials are correct and PostgreSQL is running.

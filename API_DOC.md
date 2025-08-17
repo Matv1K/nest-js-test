@@ -49,8 +49,8 @@ This document provides an overview of the available API endpoints, their methods
   {
     "title": "string",
     "description": "string",
-    "publicationDate": "YYYY-MM-DDTHH:MM:SS.sssZ",
-    "author": number
+    "publicationDate": "2003-07-22",
+    "author": 1
   }
   ```
 - **Description:** Create a new article. Requires authentication.
