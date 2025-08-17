@@ -16,8 +16,8 @@ export class ArticleService {
     private userService: UserService,
   ) {
     this.redis = new Redis({
-      host: "redis",
-      port: 6379,
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT, 10) || 6379,
     });
   }
 
@@ -102,7 +102,15 @@ export class ArticleService {
 
     // Cache invalidation
     await this.redis.del(`article:${id}`);
-
+    try {
+      const keys = await this.redis.keys('articles:*');
+      if (keys.length) {
+        await this.redis.del(...keys);
+        console.log('Invalidated article list caches:', keys);
+      }
+    } catch (err) {
+      console.error('Error invalidating article list caches:', err);
+    }
     return this.findOne(id);
   }
 
@@ -111,7 +119,15 @@ export class ArticleService {
 
     // Cache invalidation
     await this.redis.del(`article:${id}`);
-
+    try {
+      const keys = await this.redis.keys('articles:*');
+      if (keys.length) {
+        await this.redis.del(...keys);
+        console.log('Invalidated article list caches:', keys);
+      }
+    } catch (err) {
+      console.error('Error invalidating article list caches:', err);
+    }
     return { success: true };
   }
 }
