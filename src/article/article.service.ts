@@ -16,8 +16,8 @@ export class ArticleService {
     private userService: UserService,
   ) {
     this.redis = new Redis({
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT, 10) || 6379,
+      host: "redis",
+      port: 6379,
     });
   }
 
