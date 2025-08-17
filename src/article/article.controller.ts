@@ -13,6 +13,7 @@ import {
 import { ArticleService } from './article.service';
 import { CreateArticleDto, UpdateArticleDto } from './dto/article.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Article } from "./article.entity";
 
 @Controller('articles')
 export class ArticleController {

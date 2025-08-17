@@ -1,22 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
-import { Article } from '../article.entity';
+import { Article } from "./article.entity";
 import { CreateArticleDto, UpdateArticleDto } from './dto/article.dto';
 import { UserService } from '../user/user.service';
-import { Inject } from '@nestjs/common';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+import Redis from 'ioredis';
 
 @Injectable()
 export class ArticleService {
+  private redis: Redis;
+
   constructor(
     @InjectRepository(Article)
     private articleRepository: Repository<Article>,
     private userService: UserService,
-    @Inject(CACHE_MANAGER)
-    private cacheManager: Cache,
-  ) {}
+  ) {
+    this.redis = new Redis({
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT, 10) || 6379,
+    });
+  }
 
   async create(createArticleDto: CreateArticleDto, authorId: number): Promise<Article> {
     const author = await this.userService.findById(authorId);
@@ -27,8 +30,20 @@ export class ArticleService {
 
   async findAll(query: any): Promise<{ data: Article[]; count: number }> {
     const cacheKey = `articles:${JSON.stringify(query)}`;
-    const cached = await this.cacheManager.get<{ data: Article[]; count: number }>(cacheKey);
-    if (cached) return cached;
+
+    try {
+      const cached = await this.redis.get(cacheKey);
+
+      if (cached) {
+        console.log('Cache HIT for', cacheKey, 'value:', cached);
+        return JSON.parse(cached);
+      } else {
+        console.log('Cache MISS for', cacheKey);
+      }
+    } catch (err) {
+      console.error('Error reading from redis:', err);
+    }
+
     const { page = 1, limit = 10, author, publicationDate } = query;
     const where: any = {};
 
@@ -42,31 +57,61 @@ export class ArticleService {
       order: { publicationDate: 'DESC' },
     });
     const result = { data, count };
-    await this.cacheManager.set(cacheKey, result, 60);
+
+    try {
+      await this.redis.set(cacheKey, JSON.stringify(result), 'EX', 60);
+      console.log('Saved to redis:', cacheKey);
+    } catch (err) {
+      console.error('Error saving to redis:', err);
+    }
+
     return result;
   }
 
   async findOne(id: number): Promise<Article> {
     const cacheKey = `article:${id}`;
-    const cached = await this.cacheManager.get<Article>(cacheKey);
-    if (cached) return cached;
+
+    try {
+      const cached = await this.redis.get(cacheKey);
+
+      if (cached) {
+        console.log('Cache HIT for', cacheKey, 'value:', cached);
+        return JSON.parse(cached);
+      } else {
+        console.log('Cache MISS for', cacheKey);
+      }
+    } catch (err) {
+      console.error('Error reading from redis:', err);
+    }
+
     const article = await this.articleRepository.findOne({ where: { id } });
-    if (article) await this.cacheManager.set(cacheKey, article, 60);
+
+    if (article) {
+      try {
+        await this.redis.set(cacheKey, JSON.stringify(article), 'EX', 60);
+        console.log('Saved to redis:', cacheKey);
+      } catch (err) {
+        console.error('Error saving to redis:', err);
+      }
+    }
     return article;
   }
 
   async update(id: number, updateArticleDto: UpdateArticleDto): Promise<Article> {
     await this.articleRepository.update(id, updateArticleDto);
-    // Инвалидация кэша
-    await this.cacheManager.del(`article:${id}`);
-    await (this.cacheManager as any).store.reset(); // Можно оптимизировать: удалять только связанные ключи
+
+    // Cache invalidation
+    await this.redis.del(`article:${id}`);
+
     return this.findOne(id);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number): Promise<{ success: boolean }> {
     await this.articleRepository.delete(id);
-    // Инвалидация кэша
-    await this.cacheManager.del(`article:${id}`);
-    await (this.cacheManager as any).store.reset(); // Можно оптимизировать: удалять только связанные ключи
+
+    // Cache invalidation
+    await this.redis.del(`article:${id}`);
+
+    return { success: true };
   }
 }
