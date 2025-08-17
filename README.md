@@ -29,6 +29,14 @@ Follow these steps to set up and run the NestJS + PostgreSQL project using Docke
   - Build and start the NestJS app container (nest-app)
 - The NestJS app will be available at [http://localhost:3000](http://localhost:3000).
 
-## 3. API Documentation
+## 3. Stopping the Application
+
+- To stop all containers, press `Ctrl+C` in the terminal where Docker Compose is running.
+- To remove containers, networks, and volumes created by Docker Compose:
+  ```sh
+  docker-compose down -v
+  ```
+
+## 4. API Documentation
 
 - See `API_DOC.md` in the project root for available endpoints, request bodies, and usage details.
