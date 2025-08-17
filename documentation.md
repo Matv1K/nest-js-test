@@ -1,11 +1,12 @@
-# How to Run This Project
+# How to Run This Project (Dockerized)
 
-Follow these steps to set up and run the NestJS + PostgreSQL project:
+Follow these steps to set up and run the NestJS + PostgreSQL project using Docker and Docker Compose.
 
-## 1. Environment Setup
-- Copy the provided `.env` file or create your own in the project root:
+## 1. Prepare Environment Variables
+
+- Copy the provided `.env` file or create your own in the project root with the following content:
   ```env
-  DATABASE_HOST=localhost
+  DATABASE_HOST=db
   DATABASE_PORT=5432
   DATABASE_USER=your_postgres_username
   DATABASE_PASSWORD=your_postgres_password
@@ -13,26 +14,21 @@ Follow these steps to set up and run the NestJS + PostgreSQL project:
   JWT_SECRET=your_jwt_secret
   JWT_EXPIRES_IN=3600s
   ```
-- Update the values to match your local PostgreSQL credentials.
+- Update the values as needed.  
+  **Note:** For Docker Compose, set `DATABASE_HOST=db` (the service name for PostgreSQL).
 
-## 2. Database Setup
-- Create a new PostgreSQL database named `nest_auth` (or the name you set in `.env`).
-- Example using psql:
-  ```sh
-  createdb nest_auth
-  ```
+## 2. Build and Start the Application
 
-## 3. Install Dependencies
 - In the project root, run:
   ```sh
-  npm install
+  npm run docker:start
   ```
+- This command will:
+  - Start a PostgreSQL database container (db)
+  - Start a Redis container (redis)
+  - Build and start the NestJS app container (nest-app)
+- The NestJS app will be available at [http://localhost:3000](http://localhost:3000).
 
-## 4. Run the Application
-- For local development:
-  ```sh
-  npm run start:dev
-  ```
+## 3. API Documentation
 
-## 5. API Documentation
 - See `API_DOC.md` in the project root for available endpoints, request bodies, and usage details.
