@@ -3,7 +3,6 @@ import { ArticleService } from './article.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Article } from './article.entity';
 import { UserService } from '../user/user.service';
-import Redis from 'ioredis';
 
 const mockArticleRepository = () => ({
   findAndCount: jest.fn(),
@@ -44,7 +43,6 @@ describe('ArticleService', () => {
     articleRepository = module.get(getRepositoryToken(Article));
     userService = module.get(UserService);
 
-    // Подменяем реальный Redis на мок
     redis = mockRedis();
     (service as any).redis = redis;
   });

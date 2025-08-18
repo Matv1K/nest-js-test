@@ -1,5 +1,7 @@
 # How to Run This Project (Dockerized)
 
+**Note: Docker and Docker Compose must be installed on your machine to run this project.**
+
 Follow these steps to set up and run the NestJS + PostgreSQL project using Docker and Docker Compose.
 
 ## 1. Prepare Environment Variables
@@ -13,6 +15,8 @@ Follow these steps to set up and run the NestJS + PostgreSQL project using Docke
   DATABASE_NAME=nest_auth
   JWT_SECRET=your_jwt_secret
   JWT_EXPIRES_IN=3600s
+  REDIS_HOST=redis
+  REDIS_PORT=6379
   ```
 - Update the values as needed.  
   **Note:** For Docker Compose, set `DATABASE_HOST=db` (the service name for PostgreSQL).
